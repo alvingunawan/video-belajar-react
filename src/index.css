@@ -1,0 +1,38 @@
+@font-face {
+  font-family: Lato;
+  src: url("../src/font/assets/fonts/Lato-Regular.ttf");
+}
+
+@import "tailwindcss";
+
+@theme {
+  --font-lato: "Lato", "sans-serif";
+
+  --breakpoint-mobileM: 23.4375rem;
+  --breakpoint-mobileL: 26.5625rem;
+  --breakpoint-LaptopL: 90rem;
+
+  --color-primary-default: #3ecf4c;
+  --color-primary-400: #6be26b;
+  --color-primary-300: #94f08b;
+  --color-primary-200: #c0fab4;
+  --color-primary-100: #e2fcd9cc;
+
+  --color-secondary-light: #c1c2c4;
+  --color-secondary-default: #ffbd3a;
+  --color-secondary-400: #ffd26b;
+  --color-secondary-300: #ffdf88;
+  --color-secondary-200: #ffecb0;
+  --color-secondary-100: #fff7d7cc;
+
+  --color-ternary-default: #f64920;
+  --color-ternary-400: #f98256;
+  --color-ternary-300: #fca578;
+  --color-ternary-200: #fecaa5;
+  --color-ternary-100: #fee8d2cc;
+
+  --color-border: #3a35411f;
+  --color-gray: #333333;
+  --color-dark-primary: #222325;
+  --color-background: #fcf8ca;
+}
