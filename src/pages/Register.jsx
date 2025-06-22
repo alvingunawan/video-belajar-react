@@ -1,6 +1,7 @@
 import React from "react";
 import NavbarMinimal from "../components/organisms/NavbarMinimal";
 import RegisterForm from "../components/organisms/RegisterForm";
+// import { NavLink } from "react-router-dom";
 
 function Register() {
   return (

@@ -1,21 +1,17 @@
 import React from "react";
-import NavbarMinimal from "../components/organisms/NavbarMinimal";
-import LoginForm from "../components/organisms/LoginForm";
+import NavbarUser from "../components/organisms/NavbarUser";
 
-function Login() {
+function Profile() {
   return (
     <>
-      <NavbarMinimal />
+      <NavbarUser />
       <main className="min-h-screen bg-background py-5 gap-5 lg:pt-9">
         <section
           id="loginSection"
           className="mx-5 flex justify-center items-center md:mt-25 lg:mt-0"
-        >
-          <LoginForm />
-        </section>
+        ></section>
       </main>
     </>
   );
 }
-
-export default Login;
+export default Profile;
