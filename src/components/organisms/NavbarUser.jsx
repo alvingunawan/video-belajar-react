@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import logo from "../../assets/img/logo.png";
 import avatar from "../../assets/img/avatarhome.png";
 
@@ -28,11 +29,13 @@ function NavbarUser() {
       <header id="navbar" className="sticky top-0 z-50 bg-white shadow-md">
         <nav className="container mx-auto flex justify-between items-center px-4 py-2">
           <div>
-            <img
-              src={logo}
-              className="w-40 h-10 lg:w-auto lg:h-auto"
-              alt="logo"
-            />
+            <NavLink to="/">
+              <img
+                src={logo}
+                className="w-40 h-10 lg:w-auto lg:h-auto"
+                alt="logo"
+              />
+            </NavLink>
           </div>
 
           {/* Desktop Menu */}
