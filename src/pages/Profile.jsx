@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import avatar from "../assets/img/avatarhome.png";
 import Button from "../components/atoms/Button.jsx";
 import HomeUserLayouts from "../layouts/HomeUserLayouts.jsx";
+import AdminUserLayouts from "../layouts/AdminUserLayouts.jsx";
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -31,9 +32,21 @@ function Profile() {
   const handleDelete = () => {
     const confirmed = window.confirm("Apakah Anda yakin ingin menghapus akun?");
     if (!confirmed) return;
+
+    const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+
+    // Buang user yang emailnya sama dengan yang login
+    const filteredUsers = allUsers.filter(
+      (u) => u.email !== loggedInUser.email
+    );
+
+    // Simpan array baru ke localStorage
+    localStorage.setItem("users", JSON.stringify(filteredUsers));
     localStorage.removeItem("loggedInUser");
+
     alert("Akun berhasil dihapus!");
-    window.location.href = "/"; // Redirect ke halaman utama/login
+    window.location.href = "/"; // Redirect ke halaman login
   };
 
   const handleSave = () => {
@@ -53,21 +66,23 @@ function Profile() {
     alert("Profil berhasil disimpan!");
   };
 
+  const Layout = user?.role === "admin" ? AdminUserLayouts : HomeUserLayouts;
+
   if (!user) {
     return (
       <>
-        <HomeUserLayouts>
+        <Layout>
           <main className="min-h-screen bg-background py-10 flex justify-center items-center">
             <p>Memuat data pengguna...</p>
           </main>
-        </HomeUserLayouts>
+        </Layout>
       </>
     );
   }
 
   return (
     <>
-      <HomeUserLayouts>
+      <Layout>
         <main className="bg-background my-12 py-5 px-4 lg:px-10">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Kolom Kiri: Judul + Sidebar */}
@@ -193,7 +208,7 @@ function Profile() {
             </section>
           </div>
         </main>
-      </HomeUserLayouts>
+      </Layout>
     </>
   );
 }

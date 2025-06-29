@@ -3,6 +3,7 @@ import Login from "../pages/Login.jsx";
 import Home from "../pages/Home.jsx";
 import Register from "../pages/Register.jsx";
 import Profile from "../pages/Profile.jsx";
+import AdminDashboard from "../pages/AdminDashboard.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,11 @@ export const router = createBrowserRouter([
   {
     path: "/profile",
     element: <Profile />,
+    errorElement: <div>Halaman tidak ditemukan</div>,
+  },
+  {
+    path: "/dashboard",
+    element: <AdminDashboard />,
     errorElement: <div>Halaman tidak ditemukan</div>,
   },
 ]);

@@ -52,8 +52,14 @@ function RegisterForm() {
       return;
     }
 
+    // Tambahkan role user
+    const userWithRole = {
+      ...formData,
+      role: "user",
+    };
+
     const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
-    const updatedUsers = [...existingUsers, formData];
+    const updatedUsers = [...existingUsers, userWithRole];
     localStorage.setItem("users", JSON.stringify(updatedUsers));
 
     alert("Registrasi berhasil!");

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import HomeGuestLayouts from "../layouts/HomeGuestLayouts.jsx";
 import HomeUserLayouts from "../layouts/HomeUserLayouts.jsx";
+import AdminUserLayouts from "../layouts/AdminUserLayouts.jsx";
 import Hero from "../components/organisms/Hero.jsx";
 import TabsGroup from "../components/molecules/TabsGroup.jsx";
 import CardGroup from "../components/organisms/CardGroup.jsx";
@@ -33,7 +34,13 @@ function Home() {
     };
   }, []);
 
-  const LayoutComponent = loggedInUser ? HomeUserLayouts : HomeGuestLayouts;
+  const getLayoutByRole = (user) => {
+    if (!user) return HomeGuestLayouts;
+    if (user.role === "admin") return AdminUserLayouts;
+    return HomeUserLayouts;
+  };
+
+  const LayoutComponent = getLayoutByRole(loggedInUser);
 
   return (
     <LayoutComponent key={loggedInUser ? "user" : "guest"}>
