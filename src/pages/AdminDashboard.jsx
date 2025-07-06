@@ -1,26 +1,33 @@
+// AdminDashboard.jsx
 import React, { useEffect, useState } from "react";
-import image7 from "../assets/img/cardgroup/7.png";
-import avatar7 from "../assets/img/avatarhome.png";
 import Button from "../components/atoms/Button.jsx";
 import AdminUserLayouts from "../layouts/AdminUserLayouts.jsx";
+import {
+  getProducts,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+} from "../services/api/productServices.js";
+import InputField from "../components/atoms/InputField.jsx";
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
-  const [editIndex, setEditIndex] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 2;
   const [formData, setFormData] = useState({
-    imageSrc: image7,
     title: "",
     description: "",
-    avatarSrc: avatar7,
-    authorName: "",
-    authorPosition: "",
-    rating: "",
-    totalReviews: "",
+    mentor: "",
+    rolementor: "",
     price: "",
+    photos:
+      "https://img.freepik.com/free-photo/view-old-tree-lake-with-snow-covered-mountains-cloudy-day_181624-28954.jpg?semt=ais_hybrid&w=740",
+    avatar: "https://i.pravatar.cc/100",
+    totalReviews: 0,
   });
+  const [editIndex, setEditIndex] = useState(null);
+
+  const productsPerPage = 2;
 
   useEffect(() => {
     const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -28,9 +35,107 @@ function AdminDashboard() {
       setUser(loggedInUser);
     }
 
-    const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-    setProducts(storedProducts);
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const products = await getProducts();
+      setProducts(products);
+    } catch (error) {
+      console.error("Gagal mengambil data produk:", error);
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const validateForm = () => {
+    const requiredFields = [
+      "title",
+      "description",
+      "mentor",
+      "rolementor",
+      "price",
+    ];
+    for (let field of requiredFields) {
+      if (!formData[field] || formData[field].trim() === "") {
+        alert(`Kolom tidak boleh ada yang kosong.`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (!validateForm()) return;
+    const confirmation = window.confirm(
+      editIndex !== null
+        ? "Yakin menyimpan perubahan pada produk ini?"
+        : "Yakin menambahkan produk ini?"
+    );
+    if (!confirmation) return;
+    try {
+      if (editIndex !== null) {
+        const updated = { ...formData };
+        await updateProduct(products[editIndex].id, updated);
+        setEditIndex(null);
+      } else {
+        await addProduct(formData);
+      }
+      setFormData({
+        title: "",
+        description: "",
+        mentor: "",
+        rolementor: "",
+        price: "",
+        photos: "",
+        avatar: "https://i.pravatar.cc/100",
+        totalRating: 2.5,
+        totalReviews: 0,
+        imageSrc:
+          "https://img.freepik.com/free-photo/view-old-tree-lake-with-snow-covered-mountains-cloudy-day_181624-28954.jpg?semt=ais_hybrid&w=740",
+        imageAlt: "img",
+      });
+      fetchData();
+    } catch (error) {
+      console.error("Gagal menyimpan produk:", error);
+    }
+  };
+
+  const handleEdit = (index) => {
+    const product = currentProducts[index];
+    const realIndex = (currentPage - 1) * productsPerPage + index;
+    setEditIndex(realIndex);
+    setFormData({ ...product });
+  };
+
+  const handleDelete = async (index) => {
+    const confirmation = window.confirm("Yakin ingin menghapus produk ini?");
+    if (!confirmation) return;
+    try {
+      const realIndex = (currentPage - 1) * productsPerPage + index;
+      await deleteProduct(products[realIndex].id);
+      fetchData();
+    } catch (error) {
+      console.error("Gagal menghapus produk:", error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditIndex(null);
+    setFormData({
+      title: "",
+      description: "",
+      mentor: "",
+      rolementor: "",
+      price: "",
+      photos: "",
+      avatar: "",
+      totalReviews: 0,
+    });
+  };
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -50,104 +155,6 @@ function AdminDashboard() {
     if (currentPage > 1) {
       setCurrentPage((prev) => prev - 1);
     }
-  };
-
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleSave = () => {
-    const {
-      title,
-      description,
-      authorName,
-      authorPosition,
-      rating,
-      totalReviews,
-      price,
-    } = formData;
-
-    if (
-      !title ||
-      !description ||
-      !authorName ||
-      !authorPosition ||
-      !rating ||
-      !totalReviews ||
-      !price
-    ) {
-      alert("Semua field harus diisi.");
-      return;
-    }
-
-    const confirmed = window.confirm(
-      editIndex !== null
-        ? "Yakin ingin menyimpan perubahan produk ini?"
-        : "Apakah Anda yakin ingin menambah produk ini?"
-    );
-    if (!confirmed) return;
-
-    const updatedProduct = {
-      ...formData,
-      imageAlt: "big4analysisimg",
-      rating: parseFloat(rating),
-      totalReviews: parseInt(totalReviews),
-    };
-
-    let updatedProducts;
-    if (editIndex !== null) {
-      updatedProducts = [...products];
-      updatedProducts[editIndex] = updatedProduct;
-      alert("Produk berhasil diperbarui!");
-    } else {
-      updatedProducts = [...products, updatedProduct];
-      alert("Produk berhasil ditambahkan!");
-    }
-
-    setProducts(updatedProducts);
-    localStorage.setItem("products", JSON.stringify(updatedProducts));
-    resetForm();
-    setCurrentPage(1);
-  };
-
-  const handleEdit = (index) => {
-    const product = products[index];
-    setFormData({ ...product });
-    setEditIndex(index);
-  };
-
-  const handleCancelEdit = () => {
-    resetForm();
-  };
-
-  const handleDelete = (index) => {
-    const confirmed = window.confirm("Yakin ingin menghapus produk ini?");
-    if (!confirmed) return;
-
-    const updatedProducts = products.filter((_, i) => i !== index);
-    setProducts(updatedProducts);
-    localStorage.setItem("products", JSON.stringify(updatedProducts));
-
-    if (editIndex === index) {
-      resetForm();
-    }
-    setCurrentPage(1);
-  };
-
-  const resetForm = () => {
-    setFormData({
-      imageSrc: image7,
-      title: "",
-      description: "",
-      avatarSrc: avatar7,
-      authorName: "",
-      authorPosition: "",
-      rating: "",
-      totalReviews: "",
-      price: "",
-    });
-    setEditIndex(null);
   };
 
   if (!user) {
@@ -197,22 +204,15 @@ function AdminDashboard() {
                   onChange={handleChange}
                 />
                 <InputField
-                  id="authorName"
+                  id="mentor"
                   label="Nama Pengajar"
-                  value={formData.authorName}
+                  value={formData.mentor}
                   onChange={handleChange}
                 />
                 <InputField
-                  id="authorPosition"
+                  id="rolementor"
                   label="Posisi Pengajar"
-                  value={formData.authorPosition}
-                  onChange={handleChange}
-                />
-                <InputField
-                  id="rating"
-                  label="Rating (0–5)"
-                  type="number"
-                  value={formData.rating}
+                  value={formData.rolementor}
                   onChange={handleChange}
                 />
                 <InputField
@@ -224,7 +224,7 @@ function AdminDashboard() {
                 />
                 <InputField
                   id="price"
-                  label="Harga (misal: Rp 300K)"
+                  label="Harga"
                   value={formData.price}
                   onChange={handleChange}
                 />
@@ -280,52 +280,54 @@ function AdminDashboard() {
               ) : (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {currentProducts.map((product, i) => {
-                      const index = (currentPage - 1) * productsPerPage + i;
-                      return (
-                        <div
-                          key={index}
-                          className="p-4 border rounded-lg shadow-sm bg-white"
-                        >
+                    {currentProducts.map((product, i) => (
+                      <div
+                        key={i}
+                        className="p-4 border rounded-lg shadow-sm bg-white"
+                      >
+                        <img
+                          src={product.photos}
+                          alt={product.imageAlt || "Gambar produk"}
+                          className="h-32 object-cover w-full rounded"
+                        />
+                        <h5 className="mt-2 font-bold">{product.title}</h5>
+                        <p className="text-sm text-gray-600">
+                          {product.description}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
                           <img
-                            src={product.imageSrc}
-                            alt={product.imageAlt}
-                            className="h-32 object-cover w-full rounded"
+                            src={product.avatar}
+                            alt="Avatar"
+                            className="w-8 h-8 rounded-full object-cover"
                           />
-                          <h5 className="mt-2 font-bold">{product.title}</h5>
-                          <p className="text-sm text-gray-600">
-                            {product.description}
-                          </p>
-                          <p className="text-sm mt-1 text-gray-500">
-                            Pengajar: {product.authorName} (
-                            {product.authorPosition})
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Rating: {product.rating} ({product.totalReviews}{" "}
-                            ulasan)
-                          </p>
-                          <p className="text-sm font-semibold text-primary-default">
-                            {product.price}
-                          </p>
-                          <div className="flex gap-2 mt-2">
-                            <Button
-                              type="button"
-                              onClick={() => handleEdit(index)}
-                              className="bg-primary-default text-white px-3 py-1 hover:opacity-90 duration-200"
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              type="button"
-                              onClick={() => handleDelete(index)}
-                              className="bg-red-500 text-white px-3 py-1 hover:opacity-90 duration-200"
-                            >
-                              Hapus
-                            </Button>
-                          </div>
+                          <span className="text-sm text-gray-500">
+                            {product.mentor} ({product.rolementor})
+                          </span>
                         </div>
-                      );
-                    })}
+                        <p className="text-sm text-gray-500 mt-1">
+                          Rating: 2.5 ({product.totalReviews} ulasan)
+                        </p>
+                        <p className="text-sm font-semibold text-primary-default">
+                          Rp {product.price}0
+                        </p>
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            type="button"
+                            onClick={() => handleEdit(i)}
+                            className="bg-primary-default text-white px-3 py-1 hover:opacity-90 duration-200"
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => handleDelete(i)}
+                            className="bg-red-500 text-white px-3 py-1 hover:opacity-90 duration-200"
+                          >
+                            Hapus
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                   {totalPages > 1 && (
                     <div className="flex flex-col sm:flex-row justify-center items-center mt-6 gap-2 sm:gap-4">
@@ -357,23 +359,5 @@ function AdminDashboard() {
     </AdminUserLayouts>
   );
 }
-
-const InputField = ({ id, label, value, onChange, type = "text" }) => (
-  <div className="relative">
-    <label
-      htmlFor={id}
-      className="absolute -top-2 left-3 bg-white px-1 text-sm text-gray-600"
-    >
-      {label}
-    </label>
-    <input
-      type={type}
-      id={id}
-      value={value}
-      onChange={onChange}
-      className="w-full border border-gray-300 px-3 py-2 rounded-lg bg-white mt-2"
-    />
-  </div>
-);
 
 export default AdminDashboard;
