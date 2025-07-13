@@ -1,28 +1,31 @@
 // CardGroup.jsx
-import React, { useEffect, useState } from "react";
-import { getProducts } from "../../services/api/productServices.js";
+import React, { useEffect } from "react";
+import useProductStore from "../../store/useProductStore.js";
 import CardComponent from "../molecules/CardComponent.jsx";
 
 function CardGroup() {
-  const [cardsData, setCardsData] = useState([]);
+  const { products, fetchProducts, isLoading, error } = useProductStore();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const products = await getProducts();
-        setCardsData(products);
-      } catch (error) {
-        console.error("Gagal mengambil data produk:", error);
-      }
-    };
+    fetchProducts();
+  }, [fetchProducts]);
 
-    fetchData();
-  }, []);
+  if (isLoading) {
+    return <p className="text-center text-gray-500">Memuat produk...</p>;
+  }
+
+  if (error) {
+    return (
+      <p className="text-center text-red-500">
+        Gagal mengambil produk: {error}
+      </p>
+    );
+  }
 
   return (
     <>
-      {cardsData.length > 0 ? (
-        cardsData.map((card, index) => (
+      {products.length > 0 ? (
+        products.map((card, index) => (
           <CardComponent
             key={index}
             imageSrc={card.photos}
@@ -38,7 +41,7 @@ function CardGroup() {
           />
         ))
       ) : (
-        <p className="text-center text-gray-500">Memuat produk...</p>
+        <p className="text-center text-gray-500">Tidak ada produk ditemukan.</p>
       )}
     </>
   );

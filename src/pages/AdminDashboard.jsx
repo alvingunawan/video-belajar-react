@@ -2,17 +2,11 @@
 import React, { useEffect, useState } from "react";
 import Button from "../components/atoms/Button.jsx";
 import AdminUserLayouts from "../layouts/AdminUserLayouts.jsx";
-import {
-  getProducts,
-  addProduct,
-  updateProduct,
-  deleteProduct,
-} from "../services/api/productServices.js";
 import InputField from "../components/atoms/InputField.jsx";
+import useProductStore from "../store/useProductStore";
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
-  const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState({
     title: "",
@@ -28,6 +22,13 @@ function AdminDashboard() {
   const [editIndex, setEditIndex] = useState(null);
 
   const productsPerPage = 2;
+  const {
+    products,
+    fetchProducts,
+    addNewProduct,
+    updateExistingProduct,
+    deleteExistingProduct,
+  } = useProductStore();
 
   useEffect(() => {
     const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -35,17 +36,8 @@ function AdminDashboard() {
       setUser(loggedInUser);
     }
 
-    fetchData();
+    fetchProducts();
   }, []);
-
-  const fetchData = async () => {
-    try {
-      const products = await getProducts();
-      setProducts(products);
-    } catch (error) {
-      console.error("Gagal mengambil data produk:", error);
-    }
-  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -78,11 +70,10 @@ function AdminDashboard() {
     if (!confirmation) return;
     try {
       if (editIndex !== null) {
-        const updated = { ...formData };
-        await updateProduct(products[editIndex].id, updated);
+        await updateExistingProduct(products[editIndex].id, formData);
         setEditIndex(null);
       } else {
-        await addProduct(formData);
+        await addNewProduct(formData);
       }
       setFormData({
         title: "",
@@ -90,15 +81,12 @@ function AdminDashboard() {
         mentor: "",
         rolementor: "",
         price: "",
-        photos: "",
-        avatar: "https://i.pravatar.cc/100",
-        totalRating: 2.5,
-        totalReviews: 0,
-        imageSrc:
+        photos:
           "https://img.freepik.com/free-photo/view-old-tree-lake-with-snow-covered-mountains-cloudy-day_181624-28954.jpg?semt=ais_hybrid&w=740",
+        avatar: "https://i.pravatar.cc/100",
+        totalReviews: 0,
         imageAlt: "img",
       });
-      fetchData();
     } catch (error) {
       console.error("Gagal menyimpan produk:", error);
     }
@@ -116,8 +104,7 @@ function AdminDashboard() {
     if (!confirmation) return;
     try {
       const realIndex = (currentPage - 1) * productsPerPage + index;
-      await deleteProduct(products[realIndex].id);
-      fetchData();
+      await deleteExistingProduct(products[realIndex].id);
     } catch (error) {
       console.error("Gagal menghapus produk:", error);
     }
@@ -131,8 +118,9 @@ function AdminDashboard() {
       mentor: "",
       rolementor: "",
       price: "",
-      photos: "",
-      avatar: "",
+      photos:
+        "https://img.freepik.com/free-photo/view-old-tree-lake-with-snow-covered-mountains-cloudy-day_181624-28954.jpg?semt=ais_hybrid&w=740",
+      avatar: "https://i.pravatar.cc/100",
       totalReviews: 0,
     });
   };
